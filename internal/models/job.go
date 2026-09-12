@@ -5,4 +5,5 @@ type Jobs struct {
 	Cargo   string `json:"cargo"`
 	Empresa string `json:"empresa"`
 	Status  string `json:"status"`
+	Data    string `json:"data"`
 }

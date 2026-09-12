@@ -4,6 +4,7 @@ import (
 	"JobTracker/internal/dto"
 	"JobTracker/internal/repository"
 	"encoding/json"
+	"log"
 	"net/http"
 	"strconv"
 )
@@ -14,6 +15,7 @@ type TaskHandler struct {
 
 func (h *TaskHandler) Create(w http.ResponseWriter, r *http.Request) {
 	r.Body = http.MaxBytesReader(w, r.Body, 1<<20)
+	log.Printf("chamado Create ")
 
 	var in dto.JobInput
 	dec := json.NewDecoder(r.Body)
@@ -23,7 +25,7 @@ func (h *TaskHandler) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	jobs := h.JobTack.Add(in.Cargo)
+	jobs := h.JobTack.Add(in.Cargo, in.Empresa, in.Status)
 	writeJson(w, http.StatusCreated, jobs)
 }
 
@@ -43,6 +45,17 @@ func (h *TaskHandler) Get(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	writeJson(w, http.StatusOK, job)
+}
+
+func (h *TaskHandler) Delete(w http.ResponseWriter, r *http.Request) {
+	id, ok := parserId(r)
+	if !ok {
+		writeError(w, http.StatusBadRequest, "Id invalido")
+		return
+	}
+	h.JobTack.DeleteById(id)
+	w.WriteHeader(http.StatusNoContent)
+
 }
 
 func writeJson(w http.ResponseWriter, status int, v any) {
