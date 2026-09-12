@@ -3,7 +3,6 @@ package repository
 import (
 	"JobTracker/internal/models"
 	"fmt"
-	"log"
 	"sync"
 	"time"
 )
@@ -16,6 +15,16 @@ type JobTrack struct {
 
 func NewJobStore() *JobTrack {
 	return &JobTrack{jb: make(map[int]models.Jobs), NextId: 1}
+}
+
+func (j *JobTrack) Update(id int, status string) models.Jobs {
+	j.mu.Lock()
+	defer j.mu.Unlock()
+
+	updated := j.jb[id]
+	updated.Status = status
+	j.jb[id] = updated
+	return j.jb[id]
 }
 
 func (j *JobTrack) Get(id int) (models.Jobs, bool) {
@@ -31,8 +40,6 @@ func (j *JobTrack) Add(cargo string, empresa string, status string) models.Jobs 
 
 	currentId := j.NextId
 	j.jb[currentId] = models.Jobs{Id: currentId, Cargo: cargo, Empresa: empresa, Status: status, Data: time.Now().Format("2006-01-02")}
-	//j.jb[currentId] = newJobTest
-	log.Printf("criando map com chave %d, e id %d", currentId, currentId)
 
 	j.NextId++
 	return j.jb[currentId]

@@ -17,6 +17,7 @@ func main() {
 	mux.HandleFunc("POST /jobs", h.Create)
 	mux.HandleFunc("GET /jobs/{id}", h.Get)
 	mux.HandleFunc("DELETE /jobs/{id}", h.Delete)
+	mux.HandleFunc("PUT /jobs/{id}", h.Update)
 
 	if err := http.ListenAndServe(":8080", mux); err != nil {
 		log.Fatalf("Server failed to start: %v", err)
