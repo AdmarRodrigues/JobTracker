@@ -2,7 +2,6 @@ package repository
 
 import (
 	"JobTracker/internal/models"
-	"fmt"
 	"sync"
 	"time"
 )
@@ -54,7 +53,6 @@ func (j *JobTrack) ListAll() []models.Jobs {
 	for _, job := range j.jb {
 		all = append(all, job)
 	}
-	fmt.Println(all)
 	return all
 
 }
