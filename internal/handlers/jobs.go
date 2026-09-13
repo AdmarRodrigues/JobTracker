@@ -8,11 +8,11 @@ import (
 	"strconv"
 )
 
-type TaskHandler struct {
+type JobHandler struct {
 	JobTack *repository.JobTrack
 }
 
-func (h *TaskHandler) Create(w http.ResponseWriter, r *http.Request) {
+func (h *JobHandler) Create(w http.ResponseWriter, r *http.Request) {
 	r.Body = http.MaxBytesReader(w, r.Body, 1<<20)
 
 	var in dto.JobInput
@@ -27,11 +27,11 @@ func (h *TaskHandler) Create(w http.ResponseWriter, r *http.Request) {
 	writeJson(w, http.StatusCreated, jobs)
 }
 
-func (h *TaskHandler) List(w http.ResponseWriter, r *http.Request) {
+func (h *JobHandler) List(w http.ResponseWriter, r *http.Request) {
 	writeJson(w, http.StatusOK, h.JobTack.ListAll())
 }
 
-func (h *TaskHandler) Get(w http.ResponseWriter, r *http.Request) {
+func (h *JobHandler) Get(w http.ResponseWriter, r *http.Request) {
 	id, ok := parserId(r)
 	if !ok {
 		writeError(w, http.StatusBadRequest, "Id inválido")
@@ -45,7 +45,7 @@ func (h *TaskHandler) Get(w http.ResponseWriter, r *http.Request) {
 	writeJson(w, http.StatusOK, job)
 }
 
-func (h *TaskHandler) Update(w http.ResponseWriter, r *http.Request) {
+func (h *JobHandler) Update(w http.ResponseWriter, r *http.Request) {
 	id, ok := parserId(r)
 	if !ok {
 		writeError(w, http.StatusBadRequest, "Id invalido")
@@ -66,7 +66,7 @@ func (h *TaskHandler) Update(w http.ResponseWriter, r *http.Request) {
 	writeJson(w, http.StatusOK, jobs)
 }
 
-func (h *TaskHandler) Delete(w http.ResponseWriter, r *http.Request) {
+func (h *JobHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	id, ok := parserId(r)
 	if !ok {
 		writeError(w, http.StatusBadRequest, "Id invalido")

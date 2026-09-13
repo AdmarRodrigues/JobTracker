@@ -2,17 +2,19 @@ package main
 
 import (
 	"JobTracker/internal/handlers"
+	"JobTracker/internal/middleware"
 	"JobTracker/internal/repository"
 	"context"
 	"log"
 	"net"
 	"net/http"
+	"time"
 
 	"go.uber.org/fx"
 )
 
 func NewHandler(jobStore *repository.JobTrack) *http.ServeMux {
-	h := &handlers.TaskHandler{JobTack: jobStore}
+	h := &handlers.JobHandler{JobTack: jobStore}
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /jobs", h.List)
 	mux.HandleFunc("POST /jobs", h.Create)
@@ -25,7 +27,10 @@ func NewHandler(jobStore *repository.JobTrack) *http.ServeMux {
 }
 
 func NewHttpServer(lc fx.Lifecycle, mux *http.ServeMux) *http.Server {
-	srv := &http.Server{Addr: ":8080", Handler: mux}
+	srv := &http.Server{Addr: ":8080", Handler: middleware.Logging(mux),
+		ReadTimeout:  10 * time.Second,
+		WriteTimeout: 10 * time.Second,
+		IdleTimeout:  10 * time.Second}
 
 	lc.Append(fx.Hook{
 		OnStart: func(ctx context.Context) error {
