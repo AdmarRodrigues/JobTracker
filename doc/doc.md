@@ -57,3 +57,9 @@ Middleware code:
 
 ![img.png](images/middlewareCode.png)
 
+
+### 004 Dockerfile
+A MultiStage-build dockerfile.
+
+![img.png](images/dockerfile.png)
+
