@@ -23,7 +23,7 @@ func (j *JobInput) Validate() error {
 	}
 
 	if len(issues) > 0 {
-		return fmt.Errorf(strings.Join(issues, "; "))
+		return fmt.Errorf("%s", strings.Join(issues, "; "))
 	}
 	return nil
 }
