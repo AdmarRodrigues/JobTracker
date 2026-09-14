@@ -36,6 +36,11 @@ func (h *JobHandler) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if err := in.Validate(); err != nil {
+		writeError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
 	jobs := h.JobTack.Add(in.Cargo, in.Empresa, in.Status)
 	writeJson(w, http.StatusCreated, jobs)
 }
@@ -55,6 +60,7 @@ func (h *JobHandler) Get(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusNotFound, "Id not found")
 		return
 	}
+
 	writeJson(w, http.StatusOK, job)
 }
 
