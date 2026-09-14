@@ -13,19 +13,6 @@ import (
 	"go.uber.org/fx"
 )
 
-func NewHandler(jobStore *repository.JobTrack) *http.ServeMux {
-	h := &handlers.JobHandler{JobTack: jobStore}
-	mux := http.NewServeMux()
-	mux.HandleFunc("GET /jobs", h.List)
-	mux.HandleFunc("POST /jobs", h.Create)
-	mux.HandleFunc("GET /jobs/{id}", h.Get)
-	mux.HandleFunc("DELETE /jobs/{id}", h.Delete)
-	mux.HandleFunc("PUT /jobs/{id}", h.Update)
-
-	return mux
-
-}
-
 func NewHttpServer(lc fx.Lifecycle, mux *http.ServeMux) *http.Server {
 	srv := &http.Server{Addr: ":8080", Handler: middleware.Logging(mux),
 		ReadTimeout:  10 * time.Second,
@@ -57,7 +44,7 @@ func main() {
 
 	fx.New(
 		fx.Provide(
-			NewHandler, NewHttpServer, repository.NewJobStore,
+			handlers.NewHandler, NewHttpServer, repository.NewJobStore,
 		),
 		fx.Invoke(func(*http.Server) {}),
 	).Run()

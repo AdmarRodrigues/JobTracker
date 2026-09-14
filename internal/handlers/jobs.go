@@ -12,6 +12,19 @@ type JobHandler struct {
 	JobTack *repository.JobTrack
 }
 
+func NewHandler(jobStore *repository.JobTrack) *http.ServeMux {
+	h := &JobHandler{JobTack: jobStore}
+	mux := http.NewServeMux()
+	mux.HandleFunc("GET /jobs", h.List)
+	mux.HandleFunc("POST /jobs", h.Create)
+	mux.HandleFunc("GET /jobs/{id}", h.Get)
+	mux.HandleFunc("DELETE /jobs/{id}", h.Delete)
+	mux.HandleFunc("PUT /jobs/{id}", h.Update)
+
+	return mux
+
+}
+
 func (h *JobHandler) Create(w http.ResponseWriter, r *http.Request) {
 	r.Body = http.MaxBytesReader(w, r.Body, 1<<20)
 
