@@ -8,8 +8,7 @@ import (
 	"testing"
 )
 
-func TestCreateTask(t *testing.T) {
-
+func TestCreateJob(t *testing.T) {
 	cases := []struct {
 		name string
 		body string
@@ -23,6 +22,29 @@ func TestCreateTask(t *testing.T) {
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
 			req := httptest.NewRequest("POST", "/jobs", strings.NewReader(tc.body))
+			rec := httptest.NewRecorder()
+			NewHandler(repository.NewJobStore()).ServeHTTP(rec, req)
+			if rec.Code != tc.want {
+				t.Fatalf("Status: %d, Expected: %d", rec.Code, tc.want)
+			}
+		})
+	}
+}
+
+func TestGetJob(t *testing.T) {
+	cases := []struct {
+		name   string
+		target string
+		want   int
+	}{
+		{"Found", "/jobs/1", http.StatusOK},
+		{"Not Found", "/jobs/2", http.StatusNotFound},
+		{"List", "/jobs", http.StatusOK},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			req := httptest.NewRequest("GET", tc.target, nil)
 			rec := httptest.NewRecorder()
 			NewHandler(repository.NewJobStore()).ServeHTTP(rec, req)
 			if rec.Code != tc.want {

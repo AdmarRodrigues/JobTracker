@@ -12,8 +12,15 @@ type JobTrack struct {
 	NextId int
 }
 
+func populating() map[int]models.Jobs {
+	jobmap := make(map[int]models.Jobs)
+	jobmap[1] = models.Jobs{Id: 1, Cargo: "dev", Empresa: "Safra", Data: time.Now().Format("2006-01-02")}
+	return jobmap
+}
+
 func NewJobStore() *JobTrack {
-	return &JobTrack{jb: make(map[int]models.Jobs), NextId: 1}
+
+	return &JobTrack{jb: populating(), NextId: 2}
 }
 
 func (j *JobTrack) Update(id int, status string) models.Jobs {

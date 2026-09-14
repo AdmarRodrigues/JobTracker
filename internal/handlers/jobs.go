@@ -46,6 +46,12 @@ func (h *JobHandler) Create(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *JobHandler) List(w http.ResponseWriter, r *http.Request) {
+
+	if list := h.JobTack.ListAll(); len(list) == 0 {
+		writeJson(w, http.StatusOK, "Job list is Empty")
+		return
+	}
+
 	writeJson(w, http.StatusOK, h.JobTack.ListAll())
 }
 
