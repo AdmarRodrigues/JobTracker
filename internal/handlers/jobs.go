@@ -47,11 +47,6 @@ func (h *JobHandler) Create(w http.ResponseWriter, r *http.Request) {
 
 func (h *JobHandler) List(w http.ResponseWriter, r *http.Request) {
 
-	if list := h.JobTack.ListAll(); len(list) == 0 {
-		writeJson(w, http.StatusOK, "Job list is Empty")
-		return
-	}
-
 	writeJson(w, http.StatusOK, h.JobTack.ListAll())
 }
 
@@ -83,6 +78,10 @@ func (h *JobHandler) Update(w http.ResponseWriter, r *http.Request) {
 	dec := json.NewDecoder(r.Body)
 	dec.DisallowUnknownFields()
 	if err := dec.Decode(&in); err != nil {
+		writeError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+	if err := in.Validate(); err != nil {
 		writeError(w, http.StatusBadRequest, err.Error())
 		return
 	}
