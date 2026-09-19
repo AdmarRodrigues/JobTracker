@@ -19,7 +19,7 @@ import (
 	"go.uber.org/fx"
 )
 
-func ConnectDb() {
+func ConnectDb(lc fx.Lifecycle) *pgxpool.Pool {
 	ctx := context.Background()
 	dsn := os.Getenv("DATABASE_URL")
 	if dsn == "" {
@@ -55,7 +55,12 @@ func ConnectDb() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer pool.Close()
+
+	lc.Append(fx.Hook{OnStop: func(ctx context.Context) error {
+		log.Println("Closing conections pgxpool...")
+		pool.Close()
+		return nil
+	}})
 
 	pingCtx, cancel := context.WithTimeout(ctx, 3*time.Second)
 	defer cancel()
@@ -65,6 +70,7 @@ func ConnectDb() {
 	}
 
 	fmt.Println("Database connected ! ")
+	return pool
 }
 
 func NewHttpServer(lc fx.Lifecycle, mux *http.ServeMux) *http.Server {
@@ -75,7 +81,6 @@ func NewHttpServer(lc fx.Lifecycle, mux *http.ServeMux) *http.Server {
 
 	lc.Append(fx.Hook{
 		OnStart: func(ctx context.Context) error {
-			ConnectDb()
 			listener, err := net.Listen("tcp", srv.Addr)
 			if err != nil {
 				return err
@@ -99,7 +104,7 @@ func main() {
 
 	fx.New(
 		fx.Provide(
-			handlers.NewHandler, NewHttpServer, repository.NewJobStore,
+			handlers.NewHandler, NewHttpServer, repository.NewRepository, ConnectDb,
 		),
 		fx.Invoke(func(*http.Server) {}),
 	).Run()

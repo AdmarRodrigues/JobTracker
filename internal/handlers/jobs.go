@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"JobTracker/internal/dto"
+	"JobTracker/internal/models"
 	"JobTracker/internal/repository"
 	"encoding/json"
 	"net/http"
@@ -9,11 +10,11 @@ import (
 )
 
 type JobHandler struct {
-	JobTack *repository.JobTrack
+	JobTack repository.Repositoy
 }
 
-func NewHandler(jobStore *repository.JobTrack) *http.ServeMux {
-	h := &JobHandler{JobTack: jobStore}
+func NewHandler(repo repository.Repositoy) *http.ServeMux {
+	h := &JobHandler{JobTack: repo}
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /jobs", h.List)
 	mux.HandleFunc("POST /jobs", h.Create)
@@ -41,13 +42,25 @@ func (h *JobHandler) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	jobs := h.JobTack.Add(in.Cargo, in.Empresa, in.Status)
+	jobs, err := h.JobTack.Create(r.Context(), in.Cargo, in.Empresa, in.Status)
+	if err != nil {
+		writeError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
 	writeJson(w, http.StatusCreated, jobs)
 }
 
 func (h *JobHandler) List(w http.ResponseWriter, r *http.Request) {
+	jobs, err := h.JobTack.List(r.Context())
+	if err != nil {
+		writeError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
 
-	writeJson(w, http.StatusOK, h.JobTack.ListAll())
+	if jobs == nil {
+		jobs = []models.Jobs{}
+	}
+	writeJson(w, http.StatusOK, jobs)
 }
 
 func (h *JobHandler) Get(w http.ResponseWriter, r *http.Request) {
@@ -56,8 +69,8 @@ func (h *JobHandler) Get(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusBadRequest, "Id inválido")
 		return
 	}
-	job, found := h.JobTack.Get(id)
-	if !found {
+	job, found := h.JobTack.GetById(r.Context(), id)
+	if found != nil {
 		writeError(w, http.StatusNotFound, "Id not found")
 		return
 	}
@@ -86,7 +99,7 @@ func (h *JobHandler) Update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	jobs := h.JobTack.Update(id, in.Status)
+	jobs := h.JobTack.Update(r.Context(), id, in.Cargo, in.Empresa, in.Status)
 	writeJson(w, http.StatusOK, jobs)
 }
 
@@ -96,7 +109,7 @@ func (h *JobHandler) Delete(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusBadRequest, "Id invalido")
 		return
 	}
-	h.JobTack.DeleteById(id)
+	h.JobTack.DeleteById(r.Context(), id)
 	w.WriteHeader(http.StatusNoContent)
 
 }
