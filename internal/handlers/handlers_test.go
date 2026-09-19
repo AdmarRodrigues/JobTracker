@@ -80,7 +80,7 @@ func TestGetJob(t *testing.T) {
 		target string
 		want   int
 	}{
-		{"Found", "/jobs/2", http.StatusOK},
+		{"Found", "/jobs/1", http.StatusOK},
 		{"Not Found", "/jobs/100", http.StatusNotFound},
 		{"List", "/jobs", http.StatusOK},
 	}
