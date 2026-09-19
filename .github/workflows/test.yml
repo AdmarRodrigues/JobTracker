@@ -15,7 +15,7 @@ jobs:
           POSTGRES_PASSWORD: mypassword
           POSTGRES_DB: mytestdatabase
         ports:
-          - 5432:5432
+          - 5430:5432
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
@@ -40,5 +40,5 @@ jobs:
 
       - name: Run test
         env:
-          DATABASE_URL: postgresql://myuser:mypassword@localhost:5432/mytestdatabase
+          DATABASE_URL: postgresql://myuser:mypassword@localhost:5430/mytestdatabase
         run: go test -v ./...
